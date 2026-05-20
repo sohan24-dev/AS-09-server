@@ -80,7 +80,7 @@ async function run() {
             res.json(data);
 
         });
-        app.post('/ideadata', verifyToken, async (req, res) => {
+        app.post('/ideadata', async (req, res) => {
             const postData = req.body;
             // console.log(id);
             const data = await movies.insertOne(postData)
@@ -88,28 +88,79 @@ async function run() {
             res.json(data);
 
         });
+        app.delete('/idea/:id', async (req, res) => {
+            const id = req.params.id;
+
+            const result = await movies.deleteOne({
+                _id: new ObjectId(id)
+            });
+
+            res.send(result);
+        });
+        app.patch('/idea/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedData = req.body;
+
+            const result = await movies.updateOne(
+                { _id: new ObjectId(id) },
+                {
+                    $set: updatedData
+                }
+            );
+
+            res.send(result);
+        });
+
         app.get('/homedata', async (req, res) => {
             const data = await movies.find().limit(6).toArray();
             res.json(data);
         });
         app.post('/comment', verifyToken, async (req, res) => {
             const postData = req.body;
-            console.log(postData);
+            // console.log(postData);
 
             const data = await comment.insertOne({
                 text: postData.text,
                 ideaId: postData.ideaId,
                 name: postData.userName,
+                email: postData.email,
                 createdAt: new Date()
             });
 
             res.json(data);
         });
-        app.get('/comment', verifyToken, async (req, res) => {
+
+
+        app.get('/comment', async (req, res) => {
             const data = await comment.find().toArray();
             res.json(data)
 
         })
+
+        app.delete('/comment/:id', async (req, res) => {
+            const id = req.params.id;
+
+            const result = await comment.deleteOne({
+                _id: new ObjectId(id)
+            });
+
+            res.send(result);
+        });
+        app.patch('/comment/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedData = req.body;
+
+            const result = await comment.updateOne(
+                { _id: new ObjectId(id) },
+                {
+                    $set: updatedData
+                }
+            );
+
+            res.send(result);
+        });
+
+
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
