@@ -46,7 +46,7 @@ const verifyToken = async (req, res, next) => {
     }
     try {
         const { payload } = await jwtVerify(token, JWKS)
-        console.log(payload);
+        // console.log(payload);
         next()
     } catch (error) {
         return res.status(403).json({
@@ -65,11 +65,78 @@ async function run() {
 
 
 
+        // app.get('/ideadataa', async (req, res) => {
+        //     try {
+        //         const searchParam = req.query.search;
+        //         const searchString = typeof searchParam === 'string' ? searchParam : '';
+        //         let query = {};
+
+        //         if (searchString) {
+        //             const escapedSearch = searchString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        //             query = {
+        //                 $or: [
+        //                     { title: { $regex: escapedSearch, $options: 'i' } },
+        //                     { category: { $regex: escapedSearch, $options: 'i' } },
+        //                 ],
+        //             };
+        //         }
+
+        //         const data = await movies.find(query).toArray();
+        //         console.log(data, "datajson");
+        //         res.json(data);
+
+        //     } catch (error) {
+        //         res.status(500).json({ error: "Failed to fetch idea data" });
+        //     }
+        // });
+
         app.get('/ideadata', async (req, res) => {
             const data = await movies.find().toArray();
             res.json(data)
 
         })
+
+        app.get('/ideafilter', async (req, res) => {
+            try {
+                const { search } = req.query;
+
+                let cursor;
+
+                if (search) {
+                    cursor = movies.find({
+                        $or: [
+                            {
+                                title: {
+                                    $regex: search,
+                                    $options: 'i',
+                                },
+                            },
+                            {
+                                category: {
+                                    $regex: search,
+                                    $options: 'i',
+                                },
+                            },
+                        ],
+                    });
+                } else {
+                    cursor = movies.find();
+                }
+
+                const result = await cursor.toArray();
+                console.log(result, result);
+                res.send(result);
+
+            } catch (error) {
+                res.status(500).json({ error: "Failed to fetch idea data" });
+            }
+        });
+
+
+
+
+
         app.get('/ideadata/:idone', verifyToken, async (req, res) => {
             const id = req.params.idone;
             // console.log(id);
@@ -159,6 +226,7 @@ async function run() {
 
             res.send(result);
         });
+
 
 
         await client.db("admin").command({ ping: 1 });
