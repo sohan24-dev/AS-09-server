@@ -65,31 +65,6 @@ async function run() {
 
 
 
-        // app.get('/ideadataa', async (req, res) => {
-        //     try {
-        //         const searchParam = req.query.search;
-        //         const searchString = typeof searchParam === 'string' ? searchParam : '';
-        //         let query = {};
-
-        //         if (searchString) {
-        //             const escapedSearch = searchString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-        //             query = {
-        //                 $or: [
-        //                     { title: { $regex: escapedSearch, $options: 'i' } },
-        //                     { category: { $regex: escapedSearch, $options: 'i' } },
-        //                 ],
-        //             };
-        //         }
-
-        //         const data = await movies.find(query).toArray();
-        //         console.log(data, "datajson");
-        //         res.json(data);
-
-        //     } catch (error) {
-        //         res.status(500).json({ error: "Failed to fetch idea data" });
-        //     }
-        // });
 
         app.get('/ideadata', async (req, res) => {
             const data = await movies.find().toArray();
@@ -99,36 +74,35 @@ async function run() {
 
         app.get('/ideafilter', async (req, res) => {
             try {
-                const { search } = req.query;
+                const search = (req.query.search || "").trim();
 
-                let cursor;
-
-                if (search) {
-                    cursor = movies.find({
+                const query = search
+                    ? {
                         $or: [
                             {
-                                title: {
+                                IdeaTitle: {
                                     $regex: search,
-                                    $options: 'i',
+                                    $options: "i",
                                 },
                             },
                             {
-                                category: {
+                                Category: {
                                     $regex: search,
-                                    $options: 'i',
+                                    $options: "i",
                                 },
                             },
                         ],
-                    });
-                } else {
-                    cursor = movies.find();
-                }
+                    }
+                    : {};
 
-                const result = await cursor.toArray();
-                console.log(result, result);
+                const result = await movies.find(query).toArray();
+
+                // console.log("RESULT COUNT:", result.length);
+
                 res.send(result);
 
             } catch (error) {
+                // console.error(error);
                 res.status(500).json({ error: "Failed to fetch idea data" });
             }
         });
