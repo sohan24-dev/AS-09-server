@@ -148,13 +148,13 @@ async function run() {
         });
         app.patch('/comment/:id', async (req, res) => {
             const id = req.params.id;
-            const updatedData = req.body;
+            const { updatedData } = req.body;
+
+            // console.log(updatedData);
 
             const result = await comment.updateOne(
                 { _id: new ObjectId(id) },
-                {
-                    $set: updatedData
-                }
+                { $set: { text: updatedData } }
             );
 
             res.send(result);
