@@ -46,6 +46,8 @@ const verifyToken = async (req, res, next) => {
     }
     try {
         const { payload } = await jwtVerify(token, JWKS)
+        req.user = payload;
+        req.email = payload.email;
         // console.log(payload);
         next()
     } catch (error) {
@@ -181,8 +183,33 @@ async function run() {
 
         })
 
+        // app.delete('/comment/:id', verifyToken, async (req, res) => {
+        //     const id = req.params.id;
+
+        //     const result = await comment.deleteOne({
+        //         _id: new ObjectId(id)
+        //     });
+
+        //     res.send(result);
+        // });
+
         app.delete('/comment/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
+
+            const userEmail = req.user.email; // from token
+
+            // check comment belongs to this user
+            const commentData = await comment.findOne({
+                _id: new ObjectId(id)
+            });
+
+            if (!commentData) {
+                return res.status(404).send({ message: "This comment can't change you" });
+            }
+
+            if (commentData.email !== userEmail) {
+                return res.status(403).send({ message: "Forbidden: not your comment" });
+            }
 
             const result = await comment.deleteOne({
                 _id: new ObjectId(id)
@@ -190,12 +217,43 @@ async function run() {
 
             res.send(result);
         });
+
+
+        // app.patch('/comment/:id', verifyToken, async (req, res) => {
+        //     const id = req.params.id;
+        //     const { updatedData } = req.body;
+
+        //     // console.log(updatedData);
+
+        //     const result = await comment.updateOne(
+        //         { _id: new ObjectId(id) },
+        //         { $set: { text: updatedData } }
+        //     );
+
+        //     res.send(result);
+        // });
+
         app.patch('/comment/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const { updatedData } = req.body;
 
-            // console.log(updatedData);
+            const userEmail = req.user.email;
 
+            // 1. find comment first
+            const existingComment = await comment.findOne({
+                _id: new ObjectId(id)
+            });
+
+            if (!existingComment) {
+                return res.status(404).send({ message: "Comment not found" });
+            }
+
+            // 2. check ownership
+            if (existingComment.email !== userEmail) {
+                return res.status(403).send({ message: "Forbidden: not your comment" });
+            }
+
+            // 3. update comment
             const result = await comment.updateOne(
                 { _id: new ObjectId(id) },
                 { $set: { text: updatedData } }
@@ -203,8 +261,6 @@ async function run() {
 
             res.send(result);
         });
-
-
 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
