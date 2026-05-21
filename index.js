@@ -124,7 +124,7 @@ async function run() {
             res.json(data);
 
         });
-        app.post('/ideadata', async (req, res) => {
+        app.post('/ideadata', verifyToken, async (req, res) => {
             const postData = req.body;
             // console.log(id);
             const data = await movies.insertOne(postData)
@@ -132,7 +132,7 @@ async function run() {
             res.json(data);
 
         });
-        app.delete('/idea/:id', async (req, res) => {
+        app.delete('/idea/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
 
             const result = await movies.deleteOne({
@@ -141,7 +141,7 @@ async function run() {
 
             res.send(result);
         });
-        app.patch('/idea/:id', async (req, res) => {
+        app.patch('/idea/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const updatedData = req.body;
 
@@ -175,13 +175,13 @@ async function run() {
         });
 
 
-        app.get('/comment', async (req, res) => {
+        app.get('/comment', verifyToken, async (req, res) => {
             const data = await comment.find().toArray();
             res.json(data)
 
         })
 
-        app.delete('/comment/:id', async (req, res) => {
+        app.delete('/comment/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
 
             const result = await comment.deleteOne({
@@ -190,7 +190,7 @@ async function run() {
 
             res.send(result);
         });
-        app.patch('/comment/:id', async (req, res) => {
+        app.patch('/comment/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const { updatedData } = req.body;
 
