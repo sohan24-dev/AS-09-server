@@ -72,38 +72,41 @@ async function run() {
 
         })
 
-        app.get('/ideafilter', async (req, res) => {
+        app.get("/ideafilter", async (req, res) => {
             try {
                 const search = (req.query.search || "").trim();
+                const category = (req.query.category || "").trim();
 
-                const query = search
-                    ? {
-                        $or: [
-                            {
-                                IdeaTitle: {
-                                    $regex: search,
-                                    $options: "i",
-                                },
-                            },
-                            {
-                                Category: {
-                                    $regex: search,
-                                    $options: "i",
-                                },
-                            },
-                        ],
-                    }
-                    : {};
+                let query = {};
+
+
+                if (search) {
+                    query.IdeaTitle = {
+                        $regex: search,
+                        $options: "i",
+                    };
+                }
+
+
+                if (category) {
+                    query.Category = {
+                        $regex: `^${category}$`,
+                        $options: "i",
+                    };
+                }
 
                 const result = await movies.find(query).toArray();
 
-                // console.log("RESULT COUNT:", result.length);
+                console.log(result);
 
                 res.send(result);
 
             } catch (error) {
-                // console.error(error);
-                res.status(500).json({ error: "Failed to fetch idea data" });
+                console.log(error);
+
+                res.status(500).send({
+                    error: "Failed to fetch data",
+                });
             }
         });
 
