@@ -183,15 +183,6 @@ async function run() {
 
         })
 
-        // app.delete('/comment/:id', verifyToken, async (req, res) => {
-        //     const id = req.params.id;
-
-        //     const result = await comment.deleteOne({
-        //         _id: new ObjectId(id)
-        //     });
-
-        //     res.send(result);
-        // });
 
         app.delete('/comment/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
@@ -218,20 +209,6 @@ async function run() {
             res.send(result);
         });
 
-
-        // app.patch('/comment/:id', verifyToken, async (req, res) => {
-        //     const id = req.params.id;
-        //     const { updatedData } = req.body;
-
-        //     // console.log(updatedData);
-
-        //     const result = await comment.updateOne(
-        //         { _id: new ObjectId(id) },
-        //         { $set: { text: updatedData } }
-        //     );
-
-        //     res.send(result);
-        // });
 
         app.patch('/comment/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
